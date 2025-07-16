@@ -31,8 +31,8 @@ jobs:
           if [ "${{ github.event.inputs.test_scenario }}" == "failure" ]; then
             echo "❌ Code quality check failed (intentional)"
             exit 1
-          elif echo "${{ github.event.head_commit.message }}" | grep -q "\[fail-quality\]"; then
-            echo "❌ Code quality check failed (specified in commit message)"
+          elif [ -f "test.txt" ] && grep -q "fail-quality" test.txt; then
+            echo "❌ Code quality check failed (specified in test.txt)"
             exit 1
           else
             echo "✅ Code quality check passed"
@@ -52,8 +52,8 @@ jobs:
           if [ "${{ github.event.inputs.test_scenario }}" == "failure" ] || [ "${{ github.event.inputs.test_scenario }}" == "mixed" ]; then
             echo "❌ Unit tests failed (intentional)"
             exit 1
-          elif echo "${{ github.event.head_commit.message }}" | grep -q "\[fail-unit\]"; then
-            echo "❌ Unit tests failed (specified in commit message)"
+          elif [ -f "test.txt" ] && grep -q "fail-unit" test.txt; then
+            echo "❌ Unit tests failed (specified in test.txt)"
             exit 1
           else
             echo "✅ Unit tests passed"
@@ -73,8 +73,8 @@ jobs:
           if [ "${{ github.event.inputs.test_scenario }}" == "failure" ]; then
             echo "❌ Integration tests failed (intentional)"
             exit 1
-          elif echo "${{ github.event.head_commit.message }}" | grep -q "\[fail-integration\]"; then
-            echo "❌ Integration tests failed (specified in commit message)"
+          elif [ -f "test.txt" ] && grep -q "fail-integration" test.txt; then
+            echo "❌ Integration tests failed (specified in test.txt)"
             exit 1
           else
             echo "✅ Integration tests passed"
@@ -94,8 +94,8 @@ jobs:
           if [ "${{ github.event.inputs.test_scenario }}" == "mixed" ]; then
             echo "❌ Security scan found issues (intentional)"
             exit 1
-          elif echo "${{ github.event.head_commit.message }}" | grep -q "\[fail-security\]"; then
-            echo "❌ Security scan found issues (specified in commit message)"
+          elif [ -f "test.txt" ] && grep -q "fail-security" test.txt; then
+            echo "❌ Security scan found issues (specified in test.txt)"
             exit 1
           else
             echo "✅ Security scan passed"

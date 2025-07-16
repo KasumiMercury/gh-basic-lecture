@@ -10,13 +10,16 @@ Select test scenario:
 - Push to `main` or `develop` branch
 - Pull request to `main` branch
 
-control the execution of jobs by commit message
-- `[fail-quality]` - Fail code quality check
-- `[fail-unit]` - Fail unit tests
-- `[fail-integration]` - Fail integration tests
-- `[fail-security]` - Fail security scan
+control the execution of jobs by test.txt file content
+- `fail-quality` - Fail code quality check
+- `fail-unit` - Fail unit tests
+- `fail-integration` - Fail integration tests
+- `fail-security` - Fail security scan
 
 ```bash
-git commit -m "Add test feature [fail-unit]"
+# Example: Make unit tests fail
+echo "fail-unit" > test.txt
+git add test.txt
+git commit -m "Add test configuration"
 ```
 
