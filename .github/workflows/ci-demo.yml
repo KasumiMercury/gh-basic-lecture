@@ -1,0 +1,126 @@
+name: CI Demo
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      test_scenario:
+        description: 'Test scenario (success/failure/mixed)'
+        required: true
+        default: 'success'
+        type: choice
+        options:
+          - success
+          - failure
+          - mixed
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Run code quality check
+        run: |
+          echo "Running code quality check..."
+          
+          if [ "${{ github.event.inputs.test_scenario }}" == "failure" ]; then
+            echo "❌ Code quality check failed (intentional)"
+            exit 1
+          elif echo "${{ github.event.head_commit.message }}" | grep -q "\[fail-quality\]"; then
+            echo "❌ Code quality check failed (specified in commit message)"
+            exit 1
+          else
+            echo "✅ Code quality check passed"
+          fi
+      
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Run unit tests
+        run: |
+          echo "Running unit tests..."
+          
+          if [ "${{ github.event.inputs.test_scenario }}" == "failure" ] || [ "${{ github.event.inputs.test_scenario }}" == "mixed" ]; then
+            echo "❌ Unit tests failed (intentional)"
+            exit 1
+          elif echo "${{ github.event.head_commit.message }}" | grep -q "\[fail-unit\]"; then
+            echo "❌ Unit tests failed (specified in commit message)"
+            exit 1
+          else
+            echo "✅ Unit tests passed"
+          fi
+      
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Run integration tests
+        run: |
+          echo "Running integration tests..."
+          
+          if [ "${{ github.event.inputs.test_scenario }}" == "failure" ]; then
+            echo "❌ Integration tests failed (intentional)"
+            exit 1
+          elif echo "${{ github.event.head_commit.message }}" | grep -q "\[fail-integration\]"; then
+            echo "❌ Integration tests failed (specified in commit message)"
+            exit 1
+          else
+            echo "✅ Integration tests passed"
+          fi
+      
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Run security scan
+        run: |
+          echo "Running security scan..."
+          
+          if [ "${{ github.event.inputs.test_scenario }}" == "mixed" ]; then
+            echo "❌ Security scan found issues (intentional)"
+            exit 1
+          elif echo "${{ github.event.head_commit.message }}" | grep -q "\[fail-security\]"; then
+            echo "❌ Security scan found issues (specified in commit message)"
+            exit 1
+          else
+            echo "✅ Security scan passed"
+          fi
+      
+
+  deploy:
+    needs: [code-quality, unit-tests, integration-tests, security-scan]
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Run deployment
+        run: |
+          echo "🚀 Running deployment..."
+          echo "✅ Deployment completed successfully"
+      
+
+  notify:
+    needs: [code-quality, unit-tests, integration-tests, security-scan, deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Workflow completion notification
+        run: |
+          echo "Workflow completed"
